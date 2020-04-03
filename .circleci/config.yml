@@ -9,6 +9,7 @@ commands:
       - run:
           name: Intall tools
           command: |
+            set -x
             sudo mkdir /floodgate
             sudo chmod 777 /floodgate
             mkdir /floodgate/bin
