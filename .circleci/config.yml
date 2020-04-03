@@ -25,6 +25,7 @@ commands:
       - run:
           name: Wait for packaging operations to finish
           command: |
+            systemctl disable apt-daily
             sleep 10
             while systemctl status apt-daily >/dev/null || systemctl status apt-daily-upgrade >/dev/null || sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock; do
               echo "waiting 30s for dpkg locks..."
@@ -37,13 +38,12 @@ jobs:
     machine:
       image: circleci/classic:201808-01
     steps:
-      - install_toolset
+      - wait_for_dpkg
       - run:
-          name: Start Kind
+          name: Install Halyard
           command: |
-            export PATH="$PATH:$LOCALBIN"
-            kind create cluster
-            kubectl cluster-info --context kind-kind
+            curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh
+            sudo bash InstallHalyard.sh
 
 workflows:
   test:
