@@ -17,7 +17,7 @@ commands:
 jobs:
   start_minnaker:
     machine:
-      image: circleci/classic
+      image: circleci/classic:201808-01
     steps:
       - run:
           command: uname -a
