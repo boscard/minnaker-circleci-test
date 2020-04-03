@@ -9,7 +9,6 @@ commands:
       - run:
           name: Intall tools
           command: |
-            set -x
             sudo mkdir /floodgate
             sudo chmod 777 /floodgate
             mkdir /floodgate/bin
@@ -19,7 +18,6 @@ commands:
             curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
             chmod +x ./kubectl
             mv ./kubectl /floodgate/bin/
-            export PATH="$PATH:/floodgate/bin/"
     
   wait_for_dpkg:
     description: "Wait for packaging operations to finish"
@@ -34,6 +32,8 @@ commands:
             done
 jobs:
   start_minnaker:
+    environment:
+      LOCALBIN=/floodgate/bin/
     machine:
       image: circleci/classic:201808-01
     steps:
@@ -41,6 +41,7 @@ jobs:
       - run:
           name: Start Kind
           command: |
+            export PATH="$PATH:$LOCALBIN"
             kind create cluster
             kubectl cluster-info --context kind-kind
 
