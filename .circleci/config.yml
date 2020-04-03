@@ -25,8 +25,6 @@ commands:
       - run:
           name: Wait for packaging operations to finish
           command: |
-            sudo systemctl disable apt-daily.service apt-daily.timer
-            sudo systemctl stop apt-daily.service apt-daily.timer
             sleep 10
             while systemctl status apt-daily >/dev/null || systemctl status apt-daily-upgrade >/dev/null || sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock; do
               echo "waiting 30s for dpkg locks..."
@@ -45,7 +43,7 @@ jobs:
           command: |
             curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh
             USERNAME=`whoami`
-            sudo bash InstallHalyard.sh --user $USERNAME
+            sudo bash InstallHalyard.sh --user $USERNAME -y
 
 workflows:
   test:
