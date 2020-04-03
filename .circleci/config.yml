@@ -3,29 +3,45 @@ orbs:
   welcome: circleci/welcome-orb@0.4.1
 
 commands:
+  install_toolset:
+    description: "Install needed extra tools"
+    steps:
+      - run:
+          name: Intall tools
+          command: |
+            sudo mkdir /floodgate
+            sudo chmod 777 /floodgate
+            mkdir /floodgate/bin
+            curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
+            chmod +x ./kind
+            mv ./kind /floodgate/bin/
+            curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mv ./kubectl /floodgate/bin/
+            export PATH=${PATH:/floodgate/bin}
+    
   wait_for_dpkg:
     description: "Wait for packaging operations to finish"
     steps:
-    - run:
-        name: "Wait for packaging operations to finish"
-        command: |
-          sleep 10
-          while systemctl status apt-daily >/dev/null || systemctl status apt-daily-upgrade >/dev/null || sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock; do
-          echo "waiting 30s for dpkg locks..."
-          sleep 30
-          done
+      - run:
+          name: Wait for packaging operations to finish
+          command: |
+            sleep 10
+            while systemctl status apt-daily >/dev/null || systemctl status apt-daily-upgrade >/dev/null || sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock; do
+              echo "waiting 30s for dpkg locks..."
+              sleep 30
+            done
 jobs:
   start_minnaker:
     machine:
       image: circleci/classic:201808-01
     steps:
+      - install_toolset
       - run:
-          name: Install kind
+          name: Start Kind
           command: |
-            curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
-            chmod +x ./kind
-            ./kind create cluster
-            ./kind get nodes
+            kind create cluster
+            kubectl cluster-info --context kind-kind
 
 workflows:
   test:
