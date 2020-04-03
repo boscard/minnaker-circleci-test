@@ -25,7 +25,7 @@ commands:
       - run:
           name: Wait for packaging operations to finish
           command: |
-            systemctl disable apt-daily
+            sudo systemctl disable apt-daily
             sleep 10
             while systemctl status apt-daily >/dev/null || systemctl status apt-daily-upgrade >/dev/null || sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock; do
               echo "waiting 30s for dpkg locks..."
