@@ -32,6 +32,7 @@ jobs:
     machine:
       image: circleci/classic:201808-01
     steps:
+      - checkout
       - install_toolset
       - wait_for_dpkg
       - run:
