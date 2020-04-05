@@ -26,4 +26,7 @@ hal config storage edit --type s3
 hal version list
 hal config version edit --version 1.18.8
 hal deploy apply
-kubectl -n spinnaker wait --for=condition=Ready pod --all --timeout=1h
+while kubectl -n spinnaker wait --for=condition=Ready pod --all
+do
+	kubectl -n spinnaker get pods
+done
