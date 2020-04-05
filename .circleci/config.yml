@@ -39,6 +39,11 @@ jobs:
           name: Install Spinnaker
           command: |
             .circleci/libs/install-and-run-spinnaker.sh
+      - run:
+          name: Check if everything is still working
+          command: |
+            kind get clusters
+            kubectl get pods -n spinnaker
 
 workflows:
   test:
