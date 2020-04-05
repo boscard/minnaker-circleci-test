@@ -12,19 +12,18 @@ hal config provider kubernetes account add my-k8s-v2-account --provider-version 
 hal config features edit --artifacts true
 hal config deploy edit --type distributed --account-name my-k8s-v2-account
 kubectl create namespace spinnaker
-kubectl create -f https://raw.githubusercontent.com/minio/minio-operator/master/minio-operator.yaml
-kubectl create -n spinnaker -f https://raw.githubusercontent.com/minio/minio-operator/master/examples/minioinstance.yaml
+kubectl -n spinnaker create -f https://raw.githubusercontent.com/minio/minio/master/docs/orchestration/kubernetes/minio-standalone-pvc.yaml
+kubectl -n spinnaker create -f https://raw.githubusercontent.com/minio/minio/master/docs/orchestration/kubernetes/minio-standalone-deployment.yaml
+curl -O https://raw.githubusercontent.com/minio/minio/master/docs/orchestration/kubernetes/minio-standalone-service.yaml
+sed -i 's/LoadBalancer/ClusterIP/g' minio-standalone-service.yaml
+kubectl -n spinnaker create -f minio-standalone-service.yaml
 mkdir -p ~/.hal/default/profiles
 echo "spinnaker.s3.versioning: false" >> ~/.hal/default/profiles/front50-local.yml
 export MINIO_ACCESS_KEY=minio
 export MINIO_SECRET_KEY=minio123
-echo $MINIO_SECRET_KEY | hal config storage s3 edit --endpoint "http://minio-hl-svc:9000" --access-key-id $MINIO_ACCESS_KEY --secret-access-key
+echo $MINIO_SECRET_KEY | hal config storage s3 edit --endpoint "http://minio-service:9000" --access-key-id $MINIO_ACCESS_KEY --secret-access-key
 hal config storage edit --type s3
 hal version list
-hal config version edit --version 1.19.4
+hal config version edit --version 1.18.8
 hal deploy apply
-while [ `kubectl -n spinnaker get pods --no-headers | grep -c -v Running` -ne 0 ]
-do
-  kubectl -n spinnaker get pods
-  sleep 30
-done
+kubectl -n spinnaker wait --for=condition=Ready pod --all --timeout=1h
