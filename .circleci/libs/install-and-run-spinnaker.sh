@@ -21,12 +21,12 @@ mkdir -p ~/.hal/default/profiles
 echo "spinnaker.s3.versioning: false" >> ~/.hal/default/profiles/front50-local.yml
 export MINIO_ACCESS_KEY=minio
 export MINIO_SECRET_KEY=minio123
-echo $MINIO_SECRET_KEY | hal config storage s3 edit --endpoint "http://minio-service:9000" --access-key-id $MINIO_ACCESS_KEY --secret-access-key
+echo $MINIO_SECRET_KEY | hal config storage s3 edit --path-style-access=true --endpoint "http://minio-service:9000" --access-key-id $MINIO_ACCESS_KEY --secret-access-key
 hal config storage edit --type s3
 hal version list
 hal config version edit --version 1.18.8
 hal deploy apply
-while kubectl -n spinnaker wait --for=condition=Ready pod --all
+until kubectl -n spinnaker wait --for=condition=Ready pod --all > /dev/null
 do
 	kubectl -n spinnaker get pods
 done
